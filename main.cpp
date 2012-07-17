@@ -1,6 +1,6 @@
-#include <SDL\SDL.h>
+#include <SDL/SDL.h>
 #include <GL/glew.h>
-#include <GL/GL.h>
+#include <GL/gl.h>
 #include <string.h>
 #include "shaders.h"
 
@@ -65,7 +65,7 @@ void render() {
 
 int main(int argc, char *argv[]) {
 	if (argc < 3 || argc > 5) {
-		printf("Usage: %s <vertexfile> <fragmentfile> [(xres) (yres)]",argv[0]);
+		printf("Usage: %s <vertexfile> <fragmentfile> [(xres) (yres)]\n",argv[0]);
 		quit(0);
 	}
 
