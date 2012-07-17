@@ -1,37 +1,34 @@
 #include <SDL\SDL.h>
 #include <GL/glew.h>
 #include <GL/GL.h>
-#include <GL/GLU.h>
 #include <string.h>
 #include "shaders.h"
 
-shader testShader;
-int videoFlags;
+shader *testShader;
+int videoFlags, yres, xres;
 bool running = true;
 std::string vertexFile;
 std::string fragmentFile;
 
-#define xres 480
-#define yres 480
+#define _DEFAULT_XRES 480
+#define _DEFAULT_YRES 480
 
 /* function to release/destroy our resources and restoring the old desktop */
 void quit(int returnCode) {
-    /* clean up the window */
     SDL_Quit();
-
-    /* and exit appropriately */
     exit(returnCode);
 }
 
 void reloadShaders(){
-	testShader.deleteSources();
-	testShader.useShader(false);
-	testShader.loadFromFile(vertexFile,fragmentFile);
-	testShader.compileShader();
-	testShader.linkShader();
-	testShader.printLog(testShader.programObject);
-	testShader.useShader(true);
+	testShader->deleteSources();
+	testShader->useShader(false);
+	testShader->loadFromFile(vertexFile,fragmentFile);
+	testShader->compileShader();
+	testShader->linkShader();
+	testShader->printLog(testShader->programObject);
+	testShader->useShader(true);
 }
+
 /* function to handle key press events */
 void handleKeyPress(SDL_keysym *keysym) {
     switch (keysym->sym)
@@ -52,8 +49,7 @@ void handleKeyPress(SDL_keysym *keysym) {
 
 
 void render() {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glLoadIdentity();
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glBegin(GL_QUADS);
 			glColor3f(1.0f,0.0f,0.0f);  
 			glVertex2d(-1,-1);
@@ -68,15 +64,28 @@ void render() {
 }
 
 int main(int argc, char *argv[]) {
+	if (argc < 3 || argc > 5) {
+		printf("Usage: %s <vertexfile> <fragmentfile> [(xres) (yres)]",argv[0]);
+		quit(0);
+	}
+
+	if (argc > 3) {
+		xres = atoi(argv[3]);
+		yres = atoi(argv[4]);
+	}
+	else
+	{
+		xres = _DEFAULT_XRES;
+		yres = _DEFAULT_YRES;
+	}
+
+	testShader = new shader;
+
 	SDL_Surface * surface;
 	SDL_Event event;
 
+	printf("\n(r) to reload and recompile the shader from disk\n[esc] to close\n\n");
 
-	if (argc < 3) {
-		printf("Usage: %s <vertexfile> <fragmentfile>",argv[0]);
-		return 1;
-	}
-	
 	fragmentFile = argv[2];
 	vertexFile = argv[1];
 
@@ -98,12 +107,12 @@ int main(int argc, char *argv[]) {
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
 
-	testShader.loadFromFile(argv[1],argv[2]);
-	testShader.compileShader();
-	testShader.linkShader();
-	testShader.printLog(testShader.programObject);
+	testShader->loadFromFile(argv[1],argv[2]);
+	testShader->compileShader();
+	testShader->linkShader();
+	testShader->printLog(testShader->programObject);
 
-	testShader.useShader(true);
+	testShader->useShader(true);
 
 	while(running) 	{
 		while(SDL_PollEvent(&event)) {
